@@ -22,24 +22,23 @@ function random(min,max){ return Math.floor(Math.random()*(max-min)+min); }
 
 /* RENDEZETT AKADÁLYOK */
 function generateObstacles(){
-  obstacles.forEach(o=>o.remove());
-  obstacles=[];
-  // előre meghatározott, teljesíthető pozíciók
-  const positions = [
-    {x:60,y:60},{x:220,y:60},
-    {x:60,y:220},{x:220,y:220}
-  ];
-  positions.forEach(p=>{
-    const o=document.createElement("div");
-    o.className="obstacle";
-    o.style.width="60px";
-    o.style.height="12px";
-    o.style.left=p.x+"px";
-    o.style.top=p.y+"px";
+  obstacles.forEach(o => o.remove());
+  obstacles = [];
+
+  const rows = [80, 160, 240]; // fix sávok → mindig teljesíthető
+
+  rows.forEach(yPos => {
+    const o = document.createElement("div");
+    o.className = "obstacle";
+    o.style.width = "70px";
+    o.style.height = "12px";
+    o.style.left = random(40, 240) + "px";
+    o.style.top = yPos + "px";
     game.appendChild(o);
     obstacles.push(o);
   });
 }
+
 
 /* SZÍV MOZGÁS */
 function moveHeart(){
@@ -77,7 +76,7 @@ function handleDialog(answer){
     } else {
       message.textContent="Csak vicceltem, hercegnőm, játsz nyugodtan 😄";
       controls.classList.add("hidden");
-      setTimeout(restart,1200);
+      setTimeout(restart,3500);
     }
   } else if(dialogState===1){
     if(answer){
@@ -86,7 +85,7 @@ function handleDialog(answer){
       message.textContent="Csak vicceltem, hercegnőm, játsz nyugodtan 😄";
     }
     controls.classList.add("hidden");
-    setTimeout(restart,1200);
+    setTimeout(restart,3500);
   }
 }
 
