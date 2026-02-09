@@ -1,107 +1,122 @@
+const game = document.getElementById("game");
 const player = document.getElementById("player");
 const heart = document.getElementById("heart");
 const message = document.getElementById("message");
-const game = document.getElementById("game");
 
-let x = 10;
-let y = 10;
-let score = 0;
-const step = 10;
-
-// Időzítés a "try again" üzenethez
+let x = 10, y = 10;
 let lastCatchTime = Date.now();
+let gameActive = true;
+const step = 10;
+let obstacles = [];
 
-// Kezdő pozíció
-player.style.left = x + "px";
-player.style.top = y + "px";
-
-// Szív új helyre mozgatása
-function moveHeart() {
-  const maxX = game.clientWidth - 30;
-  const maxY = game.clientHeight - 30;
-
-  heart.style.left = Math.random() * maxX + "px";
-  heart.style.top = Math.random() * maxY + "px";
+function randomPos(max) {
+  return Math.floor(Math.random() * max);
 }
 
-// Ütközés ellenőrzése
-function checkCollision() {
-  const p = player.getBoundingClientRect();
-  const h = heart.getBoundingClientRect();
+/* AKADÁLYOK */
+function generateObstacles() {
+  obstacles.forEach(o => o.remove());
+  obstacles = [];
 
-  const hit = !(
-    p.right < h.left ||
-    p.left > h.right ||
-    p.bottom < h.top ||
-    p.top > h.bottom
-  );
-
-  if (hit) {
-    score++;
-    lastCatchTime = Date.now();
-    message.textContent = `Zsófi caught the heart ❤️ (${score})`;
-    moveHeart();
-    confetti();
+  for (let i = 0; i < 4; i++) {
+    const o = document.createElement("div");
+    o.className = "obstacle";
+    o.style.width = "50px";
+    o.style.height = "12px";
+    o.style.left = randomPos(300) + "px";
+    o.style.top = randomPos(300) + "px";
+    game.appendChild(o);
+    obstacles.push(o);
   }
 }
 
-// Billentyűzetes irányítás
-document.addEventListener("keydown", (e) => {
+function moveHeart() {
+  heart.style.left = randomPos(330) + "px";
+  heart.style.top = randomPos(330) + "px";
+}
+
+function rect(el) {
+  return el.getBoundingClientRect();
+}
+
+function hit(a, b) {
+  return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
+}
+
+function fail() {
+  message.textContent = "Dont worry, try again, I'm worth it!";
+  resetPosition();
+}
+
+function resetPosition() {
+  x = 10; y = 10;
+  player.style.left = x + "px";
+  player.style.top = y + "px";
+  lastCatchTime = Date.now();
+}
+
+document.addEventListener("keydown", e => {
+  if (!gameActive) return;
+
   if (e.key === "ArrowUp") y -= step;
   if (e.key === "ArrowDown") y += step;
   if (e.key === "ArrowLeft") x -= step;
   if (e.key === "ArrowRight") x += step;
 
-  // Határok
-  x = Math.max(0, Math.min(x, game.clientWidth - 30));
-  y = Math.max(0, Math.min(y, game.clientHeight - 60));
+  /* fal */
+  if (x < 0 || y < 0 || x > 330 || y > 300) {
+    fail(); return;
+  }
 
   player.style.left = x + "px";
   player.style.top = y + "px";
 
-  checkCollision();
+  const p = rect(player);
+
+  for (let o of obstacles) {
+    if (hit(p, rect(o))) {
+      fail(); return;
+    }
+  }
+
+  if (hit(p, rect(heart))) {
+    endGame();
+  }
 });
 
-// 5 mp után bátorító üzenet
 setInterval(() => {
-  const now = Date.now();
-  if (now - lastCatchTime > 5000) {
-    message.textContent = "Dont worry, try again, I'm worth it!";
+  if (Date.now() - lastCatchTime > 5000 && gameActive) {
+    fail();
   }
 }, 1000);
 
-// 🎉 Konfetti effekt
-function confetti() {
-  for (let i = 0; i < 20; i++) {
-    const dot = document.createElement("div");
-    dot.style.position = "absolute";
-    dot.style.width = "6px";
-    dot.style.height = "6px";
-    dot.style.borderRadius = "50%";
-    dot.style.background = `hsl(${Math.random() * 360}, 100%, 60%)`;
-    dot.style.left = heart.style.left;
-    dot.style.top = heart.style.top;
+function endGame() {
+  gameActive = false;
+  message.textContent = "You caught my heart ❤️";
 
-    game.appendChild(dot);
-
-    const dx = (Math.random() - 0.5) * 120;
-    const dy = (Math.random() - 0.5) * 120;
-
-    dot.animate(
-      [
-        { transform: "translate(0,0)", opacity: 1 },
-        { transform: `translate(${dx}px, ${dy}px)`, opacity: 0 }
-      ],
-      {
-        duration: 700,
-        easing: "ease-out"
+  setTimeout(() => {
+    if (!confirm("Would you like to play again?")) {
+      message.textContent = "Thanks for playing ❤️";
+    } else {
+      if (confirm("Do you really want to play with my heart?")) {
+        message.textContent = "Okay… I'm hurt, but I love you. Here is my heart ❤️";
+      } else {
+        message.textContent = "Just kidding 😄";
       }
-    );
-
-    setTimeout(() => dot.remove(), 700);
-  }
+      restart();
+    }
+  }, 600);
 }
 
-// Indítás
+function restart() {
+  gameActive = true;
+  generateObstacles();
+  moveHeart();
+  resetPosition();
+}
+
+/* START */
+generateObstacles();
 moveHeart();
-message.textContent = "Catch my heart ❤️";
+resetPosition();
+message.textContent = "Catch me ❤️";
