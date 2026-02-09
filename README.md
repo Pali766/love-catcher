@@ -2,7 +2,7 @@
 
 ## English
 
-**The Catch My Heart** is a simple browser game where you control a character to catch the heart. Every time you catch it, your score increases and the heart moves to a new position. If you don't catch the heart within 5 seconds, a friendly message will encourage you to try again.
+The **Catch My Heart** is a simple browser game where you control a character to catch the heart. Every time you catch it, your score increases and the heart moves to a new position. If you don't catch the heart within 5 seconds, a friendly message will encourage you to try again.
 
 ### How to Play
 - Use the **arrow keys** (↑ ↓ ← →) to move your character.
@@ -24,7 +24,7 @@
 
 ## Magyar
 
-**A Kapj el engem** egy egyszerű böngésző játék, ahol a karaktereddel a szívet kell elkapnod. Minden alkalommal, amikor elkapod, a pontszámod nő, és a szív új helyre ugrik. Ha 5 másodpercen belül nem sikerül elkapni, egy bátorító üzenet segít folytatni a játékot.
+A **Kapj el engem** egy egyszerű böngésző játék, ahol a karaktereddel a szívet kell elkapnod. Minden alkalommal, amikor elkapod, a pontszámod nő, és a szív új helyre ugrik. Ha 5 másodpercen belül nem sikerül elkapni, egy bátorító üzenet segít folytatni a játékot.
 
 ### Játékszabályok
 - Használd a **nyíl billentyűket** (↑ ↓ ← →) a karakter mozgatásához.
