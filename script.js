@@ -24,12 +24,11 @@ function random(min,max){ return Math.floor(Math.random()*(max-min)+min); }
 function generateObstacles(){
   obstacles.forEach(o=>o.remove());
   obstacles=[];
-
+  // előre meghatározott, teljesíthető pozíciók
   const positions = [
     {x:60,y:60},{x:220,y:60},
     {x:60,y:220},{x:220,y:220}
   ];
-
   positions.forEach(p=>{
     const o=document.createElement("div");
     o.className="obstacle";
@@ -42,11 +41,13 @@ function generateObstacles(){
   });
 }
 
+/* SZÍV MOZGÁS */
 function moveHeart(){
   heart.style.left=random(260,310)+"px";
   heart.style.top=random(260,310)+"px";
 }
 
+/* KARAKTER POZÍCIÓ RESET */
 function resetPosition(){
   x=10; y=10;
   player.style.left=x+"px";
@@ -54,11 +55,13 @@ function resetPosition(){
   startTime=Date.now();
 }
 
+/* 15 MP IDŐKORLÁT */
 function failTime(){
   message.textContent="Túl sokáig tart, életem… ennyire nem akarod a szívemet? 😞";
   resetPosition();
 }
 
+/* JÁTÉK VÉGE, DIALÓGUS */
 function endGame(){
   gameActive=false;
   controls.classList.remove("hidden");
@@ -67,35 +70,31 @@ function endGame(){
 }
 
 function handleDialog(answer){
-  switch(dialogState){
-    case 0:
-      if(answer){
-        message.textContent="Biztos, hogy a szívemmel akarsz játszani?";
-      } else {
-        message.textContent="Csak vicceltem, hercegnőm, játsz nyugodtan 😄";
-        controls.classList.add("hidden");
-        setTimeout(restart,1200);
-        return;
-      }
+  if(dialogState===0){
+    if(answer){
+      message.textContent="Biztos, hogy a szívemmel akarsz játszani?";
       dialogState++;
-      break;
-    case 1:
-      if(answer){
-        message.textContent="Hát jó… most megsértődtem, de túl sokat jelentesz, szóval itt a szívem 💗";
-      } else {
-        message.textContent="Csak vicceltem, hercegnőm, játsz nyugodtan 😄";
-      }
+    } else {
+      message.textContent="Csak vicceltem, hercegnőm, játsz nyugodtan 😄";
       controls.classList.add("hidden");
       setTimeout(restart,1200);
-      break;
+    }
+  } else if(dialogState===1){
+    if(answer){
+      message.textContent="Hát jó… most megsértődtem, de túl sokat jelentesz, szóval itt a szívem 💗";
+    } else {
+      message.textContent="Csak vicceltem, hercegnőm, játsz nyugodtan 😄";
+    }
+    controls.classList.add("hidden");
+    setTimeout(restart,1200);
   }
 }
 
 yesBtn.onclick=()=>handleDialog(true);
 noBtn.onclick=()=>handleDialog(false);
 
-/* BILLENTYŰZET MOZGÁS */
-document.addEventListener("keydown",e=>{
+/* BILLENTYŰ MOZGÁS */
+document.addEventListener("keydown", e=>{
   if(!gameActive) return;
   if(e.key==="ArrowUp") y-=step;
   if(e.key==="ArrowDown") y+=step;
@@ -104,18 +103,44 @@ document.addEventListener("keydown",e=>{
   move();
 });
 
-/* MOBIL MOZGÁS */
-let drag=false;
-player.addEventListener("touchstart",()=>drag=true);
-document.addEventListener("touchend",()=>drag=false);
-document.addEventListener("touchmove",e=>{
-  if(!drag||!gameActive) return;
+/* EGÉR / TOUCH MOZGÁS */
+let dragging=false;
+let offsetX=0, offsetY=0;
+
+player.addEventListener("mousedown", e=>{
+  dragging=true;
+  const rectPlayer=player.getBoundingClientRect();
+  offsetX = e.clientX - rectPlayer.left;
+  offsetY = e.clientY - rectPlayer.top;
+});
+document.addEventListener("mouseup", ()=>dragging=false);
+document.addEventListener("mousemove", e=>{
+  if(!dragging || !gameActive) return;
   const r=game.getBoundingClientRect();
-  x=e.touches[0].clientX-r.left-16;
-  y=e.touches[0].clientY-r.top-32;
+  x=e.clientX - r.left - offsetX;
+  y=e.clientY - r.top - offsetY;
+  move();
+});
+
+player.addEventListener("touchstart", e=>{
+  dragging=true;
+  const rectPlayer=player.getBoundingClientRect();
+  const touch=e.touches[0];
+  offsetX = touch.clientX - rectPlayer.left;
+  offsetY = touch.clientY - rectPlayer.top;
+});
+document.addEventListener("touchend", ()=>dragging=false);
+document.addEventListener("touchmove", e=>{
+  if(!dragging || !gameActive) return;
+  e.preventDefault();
+  const r=game.getBoundingClientRect();
+  const touch=e.touches[0];
+  x=touch.clientX - r.left - offsetX;
+  y=touch.clientY - r.top - offsetY;
   move();
 },{passive:false});
 
+/* MOZGÁS LOGIKA */
 function move(){
   if(x<0||y<0||x>330||y>300){ failTime(); return; }
   player.style.left=x+"px";
@@ -129,12 +154,13 @@ function move(){
   if(hit(p,rect(heart))) endGame();
 }
 
-/* 15 MP IDŐKORLÁT */
+/* IDŐ FIGYELÉS */
 setInterval(()=>{
   if(!gameActive) return;
   if(Date.now()-startTime>15000) failTime();
 },500);
 
+/* ÚJRAINDÍTÁS */
 function restart(){
   gameActive=true;
   generateObstacles();
