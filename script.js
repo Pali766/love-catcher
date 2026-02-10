@@ -25,7 +25,7 @@ function generateObstacles(){
   obstacles.forEach(o => o.remove());
   obstacles = [];
 
-  const cellSize = 40; // rács méret
+  const cellSize = 40; // rács mérete
   const cols = 8;
   const rows = 8;
 
@@ -42,6 +42,29 @@ function generateObstacles(){
     }
     path.push(cx + "-" + cy);
   }
+
+  // falak generálása, most nagyobb távolság
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const key = x + "-" + y;
+
+      if (path.includes(key)) continue; // útvonal szabad
+
+      // csak minden második oszlop/mező lehet akadály, hogy ne legyen túl szűk
+      if (Math.random() < 0.35 && (x%2===0 || y%2===0)) {
+        const o = document.createElement("div");
+        o.className = "obstacle";
+        o.style.width = cellSize + "px";
+        o.style.height = "12px";
+        o.style.left = (x * cellSize + 10) + "px";
+        o.style.top = (y * cellSize + 20) + "px";
+        game.appendChild(o);
+        obstacles.push(o);
+      }
+    }
+  }
+}
+
 
   // falak generálása
   for (let y = 0; y < rows; y++) {
